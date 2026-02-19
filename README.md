@@ -1,171 +1,118 @@
-🛡️ SafeSphere — Intelligent Women Safety System
+SafeSphere — Intelligent Women Safety System
 
-SafeSphere is an AI-powered web safety platform designed to enhance personal security using modern web technologies and intelligent risk modeling.
+SafeSphere is an AI-assisted web-based safety platform designed to enhance personal security through real-time location tracking, intelligent risk modeling, and automated emergency response mechanisms.
 
-It combines real-time GPS tracking, AI-driven safety analysis, and emergency automation features into a unified safety dashboard.
+It integrates modern browser APIs with AI-generated safety datasets to provide contextual risk awareness and emergency automation.
 
-🌟 Features
+Overview
 
-📍 Real-time GPS tracking
+SafeSphere provides:
 
-🗺️ AI-driven safety intelligence map
+Real-time GPS tracking
 
-🚨 Smart SOS system with countdown
+AI-driven risk intelligence mapping
 
-🎤 Voice-trigger emergency activation
+Smart SOS system with countdown protection
 
-🎥 Evidence recording (audio capture)
+Voice-triggered emergency activation
 
-📤 Live location sharing
+Audio evidence recording
 
-⏱ Smart check-in automation
+Live location sharing
 
-🎬 Demo mode for simulation and testing
+Automated safety check-in
 
-🚀 How to Clone & Run the Project
-1️⃣ Clone the Repository
+Simulation mode for testing and demonstrations
+
+The system operates entirely on the frontend, with optional AI-based data extraction for generating safety zones.
+
+Getting Started
+Clone the Repository
 git clone https://github.com/YOUR-USERNAME/SafeSphere.git
 cd SafeSphere
 
-🖥️ Running the Frontend (Main Application)
+Running the Application
 
-This project uses fetch() to load areas.json.
-You must run it using a local server.
+SafeSphere loads areas.json using fetch(), which requires serving the project through a local server.
 
-❌ Do NOT open index.html directly
-It will fail due to browser CORS security restrictions.
+Do not open index.html directly in the browser, as CORS restrictions will prevent proper data loading.
 
-✅ Start a Local Server (Recommended)
-
-If Python is installed:
-
+Start a Local Server (Python)
 python3 -m http.server 8000
 
 
-Then open in your browser:
+Open in browser:
 
 http://localhost:8000/index.html
 
-📁 Required Folder Structure
+Project Structure
 SafeSphere/
 │
-├── index.html
-├── script.js
-├── data.js
-├── style.css
-├── areas.json
-├── assets/
-└── articles/
+├── index.html        # Main interface
+├── script.js         # Core logic and risk engine
+├── data.js           # Data layer
+├── style.css         # UI styling
+├── areas.json        # AI-generated risk zones
+├── assets/           # Audio and media files
+└── articles/         # Source content for AI extraction
 
 
-areas.json must be in the same directory as index.html.
+areas.json must remain in the same directory as index.html.
 
-🧠 AI Data Extraction Pipeline (Optional)
+Risk Intelligence Model
 
-If you want to regenerate risk zones from articles:
+Risk scoring is dynamically calculated based on:
 
-Step 1 — Create Virtual Environment
-python3 -m venv venv
+Proximity to identified danger zones
 
+Crime severity weighting
 
-Activate it:
-
-Mac / Linux
-
-source venv/bin/activate
-
-
-Windows
-
-venv\Scripts\activate
-
-Step 2 — Install Dependencies
-pip install openai requests python-dotenv
-
-Step 3 — Add Your OpenAI API Key
-
-Create a .env file:
-
-OPENAI_API_KEY=your_api_key_here
-
-Step 4 — Run Data Extraction
-python main.py
-
-
-This will:
-
-Read articles from /articles
-
-Extract risk zones
-
-Geocode locations
-
-Generate areas.json
-
-🗺️ AI Risk Intelligence Map
-
-The application loads real-world safety zones from areas.json.
-
-Risk Zone Colors
-Color	Risk Level
-🟢 Green	Low Risk
-🟡 Yellow	Medium Risk
-🔴 Red	High Risk
-Risk Scoring Factors
-
-Risk score is dynamically calculated using:
-
-Distance from danger zones
-
-Crime severity
-
-Population density
+Population density factors
 
 Lighting conditions
 
-Time-of-day multiplier
+Time-of-day multipliers
 
-🚨 Smart SOS System
+Zones are color-coded:
 
-Emergency workflow:
+Risk Level	Color
+Low	Green
+Medium	Yellow
+High	Red
+Emergency Workflow
+Smart SOS
 
-User presses SOS
+User activates SOS
 
 5-second countdown begins
 
-If not cancelled → alarm activates
+If not cancelled, alarm is triggered
 
-Alert is logged
+Incident is logged
 
-🎤 Voice Activation
+Voice Activation
 
-Uses Web Speech Recognition API.
+The system uses the Web Speech Recognition API to detect emergency keywords such as:
 
-Recognized keywords:
+"Help"
 
-“Help”
+"Emergency"
 
-“Emergency”
+Detected keywords automatically trigger SOS.
 
-Triggers SOS automatically.
+Evidence Mode
 
-🎥 Evidence Mode
+Uses the MediaRecorder API to capture audio evidence.
 
-Records audio evidence using the MediaRecorder API.
+Recording is stored locally
 
-After stopping:
+File is timestamped
 
-File is automatically downloaded locally
+No backend storage is currently implemented
 
-Evidence is timestamped
+Location Sharing
 
-📤 Live Location Sharing
-
-Generates:
-
-Google Maps link
-
-Coordinates
+Generates a Google Maps link with live coordinates.
 
 Uses:
 
@@ -173,29 +120,65 @@ Web Share API
 
 Clipboard fallback
 
-⏱ Smart Check-In
+Smart Check-In
 
-If user does not confirm safety before timer ends:
+If the user fails to confirm safety before the selected timer expires, the system automatically triggers SOS.
 
-→ SOS is triggered automatically.
+Demo Mode
 
-🎬 Demo Mode
+Simulates movement through predefined risk zones for:
 
-Simulates movement through:
+Testing
 
-Real high-risk zones
+Demonstrations
 
-Real medium-risk zones
+Hackathons
 
-Useful for:
+Presentations
 
-Hackathon presentations
+AI Data Extraction Pipeline (Optional)
 
-Feature demonstrations
+SafeSphere includes a Python-based pipeline for generating areas.json from safety-related articles.
 
-Testing without physical movement
+Setup Virtual Environment
+python3 -m venv venv
 
-🧰 Technology Stack
+
+Activate:
+
+Mac/Linux:
+
+source venv/bin/activate
+
+
+Windows:
+
+venv\Scripts\activate
+
+Install Dependencies
+pip install openai requests python-dotenv
+
+Add API Key
+
+Create a .env file:
+
+OPENAI_API_KEY=your_api_key_here
+
+Run Extraction Script
+python main.py
+
+
+This process:
+
+Reads articles
+
+Extracts risk locations
+
+Geocodes coordinates
+
+Generates areas.json
+
+Technology Stack
 Frontend
 
 HTML5
@@ -210,7 +193,7 @@ Leaflet.js
 
 Geolocation API
 
-Speech Recognition API
+Web Speech Recognition API
 
 MediaRecorder API
 
@@ -218,13 +201,13 @@ Web Share API
 
 Data Layer
 
-AI-generated areas.json
+AI-generated JSON dataset
 
 OpenStreetMap geocoding
 
-Python-based extraction pipeline
+Python processing pipeline
 
-⚠️ Browser Requirements
+Browser Requirements
 
 Recommended:
 
@@ -232,30 +215,58 @@ Google Chrome
 
 Microsoft Edge
 
-Required permissions:
+Permissions required:
 
 Location
 
-Microphone (for Evidence & Voice)
+Microphone
 
-🔐 Security Note
+Security Notice
 
-This project runs fully on the frontend.
+Fully frontend-based architecture
 
-No backend storage is currently implemented.
+No persistent backend storage
 
-All evidence recordings are stored locally.
+Evidence files stored locally on user device
 
-🎯 Future Improvements
+Roadmap
 
 Backend API integration
 
-Real-time database logging
+Real-time logging database
 
-Heatmap toggle
+Risk heatmap visualization
 
-User authentication
+Authentication system
 
-Cloud evidence storage
+Cloud-based evidence storage
 
 SMS-based emergency alerts
+
+Contributing
+
+Contributions are welcome.
+
+Improvements to:
+
+Risk modeling
+
+UI/UX
+
+Documentation
+
+Performance
+
+Feature expansion
+
+are encouraged.
+
+Please add or refer to a .github/CONTRIBUTING.md file for structured contribution guidelines.
+
+License
+
+Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+
+If deployed as a network-accessible service, the source code must remain available under the same license terms.
+
+See the LICENSE file for details.
