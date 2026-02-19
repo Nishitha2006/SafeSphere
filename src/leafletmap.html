@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>SafeSphere - Coimbatore Safety Map</title>
+
+    <!-- Leaflet CSS -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+
+        .legend {
+            background: white;
+            padding: 12px;
+            line-height: 1.6em;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .legend span {
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Leaflet Heat Plugin -->
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
+<script>
+    const map = L.map('map').setView([11.0168, 76.9558], 12);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    fetch('./areas.json')
+        .then(response => response.json())
+        .then(data => {
+
+            const markerPositions = [];
+            const heatData = [];
+
+            data.areas.forEach(area => {
+
+                const lat = Number(area.latitude);
+                const lng = Number(area.longitude);
+
+                if (isNaN(lat) || isNaN(lng)) return;
+
+                let risk = area.risk_category.toLowerCase();
+                let color = "green";
+                let intensity = 0.3;
+
+                if (risk === "red") {
+                    color = "red";
+                    intensity = 1.0;
+                } else if (risk === "yellow") {
+                    color = "orange";
+                    intensity = 0.6;
+                }
+
+                // Circle markers
+                const marker = L.circleMarker([lat, lng], {
+                    color: color,
+                    fillColor: color,
+                    fillOpacity: 0.8,
+                    radius: 8,
+                    weight: 2
+                }).addTo(map);
+
+                marker.bindPopup(`
+                    <h3>${area.area_name}</h3>
+                    <b>Risk Level:</b> ${area.risk_category}<br>
+                    <b>Risk Score:</b> ${area.risk_score}<br>
+                    <b>Crime Level:</b> ${area.crime_level}<br>
+                    <b>Population Density:</b> ${area.population_density}<br>
+                    <b>Lighting:</b> ${area.lighting_condition}
+                `);
+
+                markerPositions.push([lat, lng]);
+                heatData.push([lat, lng, intensity]);
+            });
+
+            if (markerPositions.length > 0) {
+                map.fitBounds(markerPositions);
+            }
+
+            // Heatmap Layer
+            const heatLayer = L.heatLayer(heatData, {
+                radius: 35,
+                blur: 25,
+                maxZoom: 17,
+                gradient: {
+                    0.2: 'green',
+                    0.5: 'orange',
+                    0.8: 'red'
+                }
+            });
+
+            heatLayer.addTo(map);
+
+        })
+        .catch(error => {
+            console.error("Error loading JSON:", error);
+        });
+</script>
+
+</body>
+</html>

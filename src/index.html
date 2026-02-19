@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeSphere — AI Safety Intelligence</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Bebas+Neue&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- Ambient background -->
+<div class="bg-noise"></div>
+<div class="bg-glow"></div>
+<div class="scan-line"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-left">
+    <div class="brand">
+      <svg class="shield-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L3 6V12C3 16.5 7 20.7 12 22C17 20.7 21 16.5 21 12V6L12 2Z" fill="rgba(255,40,40,0.15)" stroke="#ff2828" stroke-width="1.5"/>
+        <path d="M9 12L11 14L15 10" stroke="#ff2828" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span class="brand-text">Safe<span class="accent">Sphere</span></span>
+      <span class="brand-version">v2.0</span>
+    </div>
+  </div>
+
+  <div class="nav-center">
+    <div class="status-bar">
+      <span class="status-dot"></span>
+      <span class="status-text" id="navStatus">System Active</span>
+    </div>
+    <div class="divider-v"></div>
+    <span class="nav-time" id="navClock">--:--:--</span>
+  </div>
+
+  <div class="nav-right">
+    <button class="nav-btn ghost" onclick="getLocation()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+      Track
+    </button>
+    <button class="nav-btn ghost" onclick="startListening()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
+      Voice
+    </button>
+    <button class="nav-btn sos-nav" onclick="triggerSOS()">
+      <span class="sos-pulse-ring"></span>
+      🚨 SOS
+    </button>
+  </div>
+</nav>
+
+<main class="layout">
+
+  <!-- LEFT PANEL -->
+  <aside class="sidebar left-sidebar">
+
+    <!-- GPS Card -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-label">GPS Location</span>
+        <span class="live-pill">
+          <span class="live-dot"></span>LIVE
+        </span>
+      </div>
+      <div class="coords-display">
+        <div class="coord-row">
+          <span class="coord-key">LAT</span>
+          <span class="coord-val" id="lat-display">—</span>
+        </div>
+        <div class="coord-row">
+          <span class="coord-key">LON</span>
+          <span class="coord-val" id="lon-display">—</span>
+        </div>
+        <div id="location" style="display:none"></div>
+      </div>
+      <button class="action-btn primary" onclick="getLocation()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+        Start Tracking
+      </button>
+    </div>
+
+    <!-- Risk Intelligence -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-label">Risk Intelligence</span>
+        <select id="modeSelect" class="mode-select">
+          <option value="high">⚡ High Alert</option>
+          <option value="normal" selected>◎ Normal</option>
+          <option value="calm">○ Calm</option>
+        </select>
+      </div>
+      <div class="score-display">
+        <div class="score-ring-wrap">
+          <svg class="score-ring" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="6"/>
+            <circle id="scoreArc" cx="40" cy="40" r="32" fill="none" stroke="#34c759" stroke-width="6"
+              stroke-dasharray="201" stroke-dashoffset="0" stroke-linecap="round"
+              transform="rotate(-90 40 40)" style="transition:stroke-dashoffset 0.6s, stroke 0.4s"/>
+          </svg>
+          <div class="score-inner">
+            <span class="score-number" id="score">100</span>
+            <span class="score-sub">/ 100</span>
+          </div>
+        </div>
+        <div class="score-meta">
+          <div class="meta-row">
+            <span class="meta-key">Status</span>
+            <span class="meta-val safe" id="scoreLabel">Safe</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-key">Trend</span>
+            <span class="meta-val" id="trend">➡ Stable</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Explanation -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-label">AI Analysis</span>
+        <span class="ai-badge">GPT</span>
+      </div>
+      <ul id="explanationList" class="explanation-list">
+        <li class="empty-state">Awaiting location data…</li>
+      </ul>
+    </div>
+
+    <!-- Check-In -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-label">Smart Check-In</span>
+      </div>
+      <div class="checkin-row">
+        <select id="checkInDuration" class="mode-select" style="flex:1">
+          <option value="60">1 Minute</option>
+          <option value="300">5 Minutes</option>
+          <option value="600">10 Minutes</option>
+        </select>
+        <button class="action-btn accent-sm" onclick="startCheckIn()">Start</button>
+      </div>
+
+      <div id="checkInPanel" style="display:none; margin-top:12px;">
+        <div class="timer-display">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span id="checkInTimer">0:00</span>
+        </div>
+        <div class="checkin-actions">
+          <button class="action-btn safe-btn-sm" onclick="confirmSafe()">✅ I'm Safe</button>
+          <button class="action-btn danger-sm" onclick="triggerSOS()">🚨 Help</button>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- MAP -->
+  <section class="map-section">
+    <div class="map-topbar">
+      <div class="map-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3,11 11,3 22,3 22,14 14,22 3,22"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>
+        Threat Radar Map
+      </div>
+      <div class="map-badges">
+        <span class="map-badge">
+          <span class="live-dot red"></span>
+          3 Risk Zones
+        </span>
+        <span class="map-badge">OSM</span>
+      </div>
+    </div>
+    <div id="map"></div>
+    <div class="map-footer">
+      <span>⬤ High Risk</span>
+      <span>◎ Medium Risk</span>
+      <span>○ Your Position</span>
+    </div>
+  </section>
+
+  <!-- RIGHT PANEL -->
+  <aside class="sidebar right-sidebar">
+
+    <!-- SOS -->
+    <div class="sos-card">
+      <div class="sos-label-top">EMERGENCY</div>
+      <div class="sos-rings-wrap">
+        <div class="ring r1"></div>
+        <div class="ring r2"></div>
+        <div class="ring r3"></div>
+        <button class="sos-btn" onclick="triggerSOS()">
+          <span class="sos-text">SOS</span>
+          <span class="sos-hint">PRESS & HOLD</span>
+        </button>
+      </div>
+      <p class="sos-desc">Triggers alarm + logs incident</p>
+      <button id="stopAlarmBtn" onclick="stopAlarm()" style="display:none" class="stop-alarm-btn">
+        🔇 Stop Alarm
+      </button>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-label">Quick Actions</span>
+      </div>
+      <div class="qa-grid">
+        <button class="qa-btn" onclick="fakeCall()">
+          <span class="qa-icon">📞</span>
+          <span class="qa-name">Fake Call</span>
+        </button>
+        
+        </button>
+        <button class="qa-btn" onclick="shareLocation()">
+          <span class="qa-icon">📤</span>
+          <span class="qa-name">Share Location</span>
+        </button>
+        <button class="qa-btn" onclick="startListening()">
+          <span class="qa-icon">🎤</span>
+          <span class="qa-name">Voice Cmd</span>
+        </button>
+        <button class="qa-btn qa-btn-wide" id="demoBtn" onclick="toggleDemo()">
+          <span class="qa-icon">🎬</span>
+          <span class="qa-name">Demo Mode</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Alert Log -->
+    <div class="card" style="flex:1; min-height:0;">
+      <div class="card-header">
+        <span class="card-label">Alert Log</span>
+        <button onclick="document.getElementById('alertLog').innerHTML=''" class="clear-btn">Clear</button>
+      </div>
+      <div id="alertLog" class="alert-log-scroll">
+        <div class="log-empty">No alerts yet</div>
+      </div>
+    </div>
+
+  </aside>
+
+</main>
+
+<!-- Fake Call Overlay -->
+<div class="call-overlay" id="callScreen">
+  <div class="call-card">
+    <div class="call-ripple r1"></div>
+    <div class="call-ripple r2"></div>
+    <div class="call-avatar">👩</div>
+    <div class="call-name">MOM</div>
+    <div class="call-subtitle">Incoming Call…</div>
+    <div class="call-number">+91 98765 43210</div>
+    <div class="call-actions">
+      <button class="call-btn decline" onclick="document.getElementById('callScreen').style.display='none'">✕ Decline</button>
+      <button class="call-btn accept" onclick="document.getElementById('callScreen').style.display='none'">✓ Accept</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- SOS Countdown Overlay -->
+<div class="sos-overlay" id="sosOverlay">
+  <div class="sos-countdown-card">
+    <div class="sos-cd-label">SENDING SOS IN</div>
+    <div class="sos-cd-ring">
+      <span class="sos-cd-num" id="sosCountdownNum">5</span>
+    </div>
+    <p class="sos-cd-sub">Emergency alarm will trigger automatically</p>
+    <button class="sos-cd-cancel" onclick="cancelSOS()">✕ Cancel</button>
+  </div>
+</div>
+
+<audio id="alarm" preload="auto">
+  <source src="alarm.mp3" type="audio/mpeg">
+</audio>
+
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+
+<script>
+// Clock
+function updateClock() {
+  const now = new Date();
+  document.getElementById('navClock').textContent = now.toLocaleTimeString('en-US', {hour12: false});
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Override showPosition to update the new split coord displays
+const _origShowPosition = showPosition;
+window.showPosition = function(position) {
+  _origShowPosition(position);
+  const lat = position.coords.latitude.toFixed(5);
+  const lon = position.coords.longitude.toFixed(5);
+  document.getElementById('lat-display').textContent = lat;
+  document.getElementById('lon-display').textContent = lon;
+};
+
+// Override logAlert to use new styled entries
+const _origLogAlert = logAlert;
+window.logAlert = function(msg) {
+  const log = document.getElementById('alertLog');
+  const empty = log.querySelector('.log-empty');
+  if (empty) empty.remove();
+
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  const time = new Date().toLocaleTimeString('en-US', {hour12: false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  entry.innerHTML = `<span class="log-dot"></span><div class="log-content"><span class="log-msg">${msg}</span><span class="log-time">${time}</span></div>`;
+  log.insertBefore(entry, log.firstChild);
+};
+
+// Override fakeCall to show custom screen
+window.fakeCall = function() {
+  document.getElementById('callScreen').style.display = 'flex';
+};
+
+// Override updateRisk to animate score ring
+const _origUpdateRisk = updateRisk;
+window.updateRisk = function(lat, lon) {
+  _origUpdateRisk(lat, lon);
+  const scoreVal = parseInt(document.getElementById('score').textContent);
+  const arc = document.getElementById('scoreArc');
+  const circumference = 201;
+  const offset = circumference - (scoreVal / 100) * circumference;
+  arc.style.strokeDashoffset = offset;
+
+  const label = document.getElementById('scoreLabel');
+  if (scoreVal >= 70) {
+    arc.style.stroke = '#34c759';
+    label.textContent = 'Safe';
+    label.className = 'meta-val safe';
+  } else if (scoreVal >= 40) {
+    arc.style.stroke = '#ff9500';
+    label.textContent = 'Caution';
+    label.className = 'meta-val warn';
+  } else {
+    arc.style.stroke = '#ff3c3c';
+    label.textContent = 'Danger';
+    label.className = 'meta-val danger';
+  }
+};
+</script>
+</body>
+</html>
