@@ -1,24 +1,26 @@
 🛡️ SafeSphere — Intelligent Women Safety System
 
-SafeSphere is an AI-powered web safety platform that provides:
+SafeSphere is an AI-powered web safety platform designed to enhance personal security using modern web technologies and intelligent risk modeling.
+
+It combines real-time GPS tracking, AI-driven safety analysis, and emergency automation features into a unified safety dashboard.
+
+🌟 Features
 
 📍 Real-time GPS tracking
 
 🗺️ AI-driven safety intelligence map
 
-🚨 Smart SOS system
+🚨 Smart SOS system with countdown
 
 🎤 Voice-trigger emergency activation
 
-🎥 Evidence recording
+🎥 Evidence recording (audio capture)
 
 📤 Live location sharing
 
 ⏱ Smart check-in automation
 
-🎬 Demo mode for simulation
-
-It combines modern web APIs with AI-generated real-world safety data.
+🎬 Demo mode for simulation and testing
 
 🚀 How to Clone & Run the Project
 1️⃣ Clone the Repository
@@ -27,27 +29,24 @@ cd SafeSphere
 
 🖥️ Running the Frontend (Main Application)
 
-This project uses fetch() to load areas.json, so you must run it using a local server.
+This project uses fetch() to load areas.json.
+You must run it using a local server.
 
 ❌ Do NOT open index.html directly
-
-It will break due to browser security (CORS).
+It will fail due to browser CORS security restrictions.
 
 ✅ Start a Local Server (Recommended)
 
-If you have Python installed:
+If Python is installed:
 
 python3 -m http.server 8000
 
 
-Then open in browser:
+Then open in your browser:
 
 http://localhost:8000/index.html
 
 📁 Required Folder Structure
-
-Make sure your project looks like this:
-
 SafeSphere/
 │
 ├── index.html
@@ -59,9 +58,9 @@ SafeSphere/
 └── articles/
 
 
-areas.json must be in the same folder as index.html.
+areas.json must be in the same directory as index.html.
 
-🧠 Running the AI Data Extraction Script (Optional)
+🧠 AI Data Extraction Pipeline (Optional)
 
 If you want to regenerate risk zones from articles:
 
@@ -72,9 +71,12 @@ python3 -m venv venv
 Activate it:
 
 Mac / Linux
+
 source venv/bin/activate
 
+
 Windows
+
 venv\Scripts\activate
 
 Step 2 — Install Dependencies
@@ -104,14 +106,14 @@ Generate areas.json
 
 The application loads real-world safety zones from areas.json.
 
-Zones are color-coded:
-
+Risk Zone Colors
 Color	Risk Level
 🟢 Green	Low Risk
 🟡 Yellow	Medium Risk
 🔴 Red	High Risk
+Risk Scoring Factors
 
-Risk scoring is dynamically calculated using:
+Risk score is dynamically calculated using:
 
 Distance from danger zones
 
@@ -139,7 +141,7 @@ Alert is logged
 
 Uses Web Speech Recognition API.
 
-Recognizes keywords:
+Recognized keywords:
 
 “Help”
 
@@ -165,7 +167,11 @@ Google Maps link
 
 Coordinates
 
-Uses Web Share API (with clipboard fallback)
+Uses:
+
+Web Share API
+
+Clipboard fallback
 
 ⏱ Smart Check-In
 
@@ -235,7 +241,9 @@ Microphone (for Evidence & Voice)
 🔐 Security Note
 
 This project runs fully on the frontend.
+
 No backend storage is currently implemented.
+
 All evidence recordings are stored locally.
 
 🎯 Future Improvements
