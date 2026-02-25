@@ -1,51 +1,48 @@
-SafeSphere — Intelligent Women Safety System
+# SafeSphere — Intelligent Women Safety System
 
-SafeSphere is an AI-assisted web-based safety platform designed to enhance personal security through real-time location tracking, intelligent risk modeling, and automated emergency response mechanisms.
+SafeSphere is a web-based safety platform designed to help people feel more secure. It uses real-time location tracking, risk modeling, and automated emergency features to provide a blanket of security when you're on the move. 
 
-It integrates modern browser APIs with AI-generated safety datasets to provide contextual risk awareness and emergency automation.
+The idea is simple: combining browser capabilities with safety datasets to give you a clear picture of your surroundings, while keeping emergency tools just a tap or a voice command away.
 
-Overview
+## Overview
 
-SafeSphere provides:
+Here is what SafeSphere can do:
+- **Real-time GPS tracking**
+- **Risk mapping** to show you potentially unsafe areas
+- **Smart SOS system** with a cancellation countdown lock
+- **Voice-triggered emergency activation** (just say "Help" or "Emergency")
+- **Audio evidence recording**
+- **Live location sharing** with your contacts
+- **Automated safety check-ins**
+- **Simulation mode** if you just want to test it out
 
-Real-time GPS tracking
+Everything runs directly in your browser. We also included an optional AI pipeline if you want to generate your own safety zones from news articles.
 
-AI-driven risk intelligence mapping
+## Getting Started
 
-Smart SOS system with countdown protection
-
-Voice-triggered emergency activation
-
-Audio evidence recording
-
-Live location sharing
-
-Automated safety check-in
-
-Simulation mode for testing and demonstrations
-
-The system operates entirely on the frontend, with optional AI-based data extraction for generating safety zones.
-
-Getting Started
-Clone the Repository
+### Clone the Repository
+```bash
 git clone https://github.com/YOUR-USERNAME/SafeSphere.git
 cd SafeSphere
+```
 
-Running the Application
+### Running the Application
 
-SafeSphere loads areas.json using fetch(), which requires serving the project through a local server.
+Because SafeSphere needs to load local data files (like `areas.json`), you can't just double-click the `index.html` file. Modern browsers will block it for security reasons (CORS).
 
-Do not open index.html directly in the browser, as CORS restrictions will prevent proper data loading.
+Instead, you just need to spin up a quick local server. If you have Python installed, it's super easy:
 
-Start a Local Server (Python)
+**Start a Local Server:**
+```bash
 python3 -m http.server 8000
+```
 
+**Open in your browser:**
+Head over to [http://localhost:8000/index.html](http://localhost:8000/index.html)
 
-Open in browser:
+## Project Structure
 
-http://localhost:8000/index.html
-
-Project Structure
+```
 SafeSphere/
 │
 ├── index.html        # Main interface
@@ -55,218 +52,109 @@ SafeSphere/
 ├── areas.json        # AI-generated risk zones
 ├── assets/           # Audio and media files
 └── articles/         # Source content for AI extraction
+```
 
+> **Note**: Make sure `areas.json` stays in the same folder as `index.html`.
 
-areas.json must remain in the same directory as index.html.
+## How Risk Intelligence Works
 
-Risk Intelligence Model
+SafeSphere doesn't just guess risk levels; it calculates a dynamic score based on a few factors:
+- How close you are to known danger zones
+- Weighted severity of past incidents
+- Population density
+- Lighting conditions
+- The time of day
 
-Risk scoring is dynamically calculated based on:
+**Zones are color-coded on the map for quick reading:**
+| Risk Level | Color  |
+| --- | --- |
+| Low | Green  |
+| Medium | Yellow |
+| High | Red |
 
-Proximity to identified danger zones
+## Emergency Workflow
 
-Crime severity weighting
+### Smart SOS
+1. You activate the SOS button.
+2. A 5-second countdown starts in case it was an accident.
+3. If you don't cancel it, the alarm goes off and the incident is logged.
 
-Population density factors
+### Voice Activation
+When your hands are full or you can't reach your phone, you can just use your voice. The system listens for keywords like "Help" or "Emergency" and automatically triggers the SOS.
 
-Lighting conditions
+### Evidence Mode
+- Automatically uses your microphone to capture audio evidence.
+- The recording is saved straight to your local device with a timestamp.
+- *Note: We deliberately don't store these recordings on any external servers yet.*
 
-Time-of-day multipliers
+### Location Sharing
+Need to tell someone where you are? The app generates a Google Maps link with your exact coordinates that you can quickly share or copy to your clipboard.
 
-Zones are color-coded:
+### Smart Check-In
+Set a timer. If it expires and you haven't clicked the button to confirm you are safe, SafeSphere automatically triggers an SOS.
 
-Risk Level	Color
-Low	Green
-Medium	Yellow
-High	Red
-Emergency Workflow
-Smart SOS
+### Demo Mode
+We built a simulation mode so you can test how the app reacts as it "moves" through different risk zones. It's great for presentations or just seeing how things work under the hood.
 
-User activates SOS
+## AI Data Extraction Pipeline (Optional)
 
-5-second countdown begins
+If you're interested in the data generation side, SafeSphere includes a Python pipeline that reads safety-related articles, extracts the location data, geocodes it, and generates the `areas.json` file.
 
-If not cancelled, alarm is triggered
-
-Incident is logged
-
-Voice Activation
-
-The system uses the Web Speech Recognition API to detect emergency keywords such as:
-
-"Help"
-
-"Emergency"
-
-Detected keywords automatically trigger SOS.
-
-Evidence Mode
-
-Uses the MediaRecorder API to capture audio evidence.
-
-Recording is stored locally
-
-File is timestamped
-
-No backend storage is currently implemented
-
-Location Sharing
-
-Generates a Google Maps link with live coordinates.
-
-Uses:
-
-Web Share API
-
-Clipboard fallback
-
-Smart Check-In
-
-If the user fails to confirm safety before the selected timer expires, the system automatically triggers SOS.
-
-Demo Mode
-
-Simulates movement through predefined risk zones for:
-
-Testing
-
-Demonstrations
-
-Hackathons
-
-Presentations
-
-AI Data Extraction Pipeline (Optional)
-
-SafeSphere includes a Python-based pipeline for generating areas.json from safety-related articles.
-
-Setup Virtual Environment
+### Setup Virtual Environment
+```bash
 python3 -m venv venv
+```
 
+**Activate it:**
+- Mac/Linux: `source venv/bin/activate`
+- Windows: `venv\Scripts\activate`
 
-Activate:
-
-Mac/Linux:
-
-source venv/bin/activate
-
-
-Windows:
-
-venv\Scripts\activate
-
-Install Dependencies
+### Install Dependencies
+```bash
 pip install openai requests python-dotenv
+```
 
-Add API Key
-
-Create a .env file:
-
+### Add your API Key
+Create a `.env` file in the root directory:
+```env
 OPENAI_API_KEY=your_api_key_here
+```
 
-Run Extraction Script
+### Run the Extraction Script
+```bash
 python main.py
+```
 
+## Technology Stack
 
-This process:
+### Frontend
+- HTML5, CSS3, JavaScript (ES6)
 
-Reads articles
+### Browser APIs Used
+- Leaflet.js (Mapping)
+- Geolocation API
+- Web Speech Recognition API
+- MediaRecorder API
+- Web Share API
 
-Extracts risk locations
+### Data Layer
+- AI-generated JSON datasets
+- OpenStreetMap geocoding
+- Python processing pipeline
 
-Geocodes coordinates
+## Browser Requirements
 
-Generates areas.json
+**Recommended:** Google Chrome or Microsoft Edge
+**Permissions:** Make sure to allow Location and Microphone access when prompted, otherwise core features won't work.
 
-Technology Stack
-Frontend
+## A Quick Security Note
+SafeSphere is built entirely on the frontend right now. This means there is no central database storing your data, and any evidence files it creates are saved directly onto your device.
 
-HTML5
-
-CSS3
-
-JavaScript (ES6)
-
-APIs
-
-Leaflet.js
-
-Geolocation API
-
-Web Speech Recognition API
-
-MediaRecorder API
-
-Web Share API
-
-Data Layer
-
-AI-generated JSON dataset
-
-OpenStreetMap geocoding
-
-Python processing pipeline
-
-Browser Requirements
-
-Recommended:
-
-Google Chrome
-
-Microsoft Edge
-
-Permissions required:
-
-Location
-
-Microphone
-
-Security Notice
-
-Fully frontend-based architecture
-
-No persistent backend storage
-
-Evidence files stored locally on user device
-
-Roadmap
-
-Backend API integration
-
-Real-time logging database
-
-Risk heatmap visualization
-
-Authentication system
-
-Cloud-based evidence storage
-
-SMS-based emergency alerts
-
-Contributing
-
-Contributions are welcome.
-
-Improvements to:
-
-Risk modeling
-
-UI/UX
-
-Documentation
-
-Performance
-
-Feature expansion
-
-are encouraged.
-
-Please add or refer to a .github/CONTRIBUTING.md file for structured contribution guidelines.
-
-License
-
-Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
-
-If deployed as a network-accessible service, the source code must remain available under the same license terms.
-
-See the LICENSE file for details.
+## What's Next (Roadmap)
+We've got a lot planned to make SafeSphere even better. Some things we're looking to add:
+- A dedicated backend API
+- A real-time database for continuous logging
+- Risk heatmap visualizers
+- User authentication
+- Cloud storage for evidence files
+- SMS-based alerts
