@@ -214,11 +214,11 @@
         <span class="card-label">Quick Actions</span>
       </div>
       <div class="qa-grid">
-        <button class="qa-btn" onclick="fakeCall()">
+        <button class="qa-btn" onclick="fakeCall();">
           <span class="qa-icon">📞</span>
           <span class="qa-name">Fake Call</span>
         </button>
-        
+      
         </button>
         <button class="qa-btn" onclick="shareLocation()">
           <span class="qa-icon">📤</span>
@@ -253,18 +253,33 @@
 <!-- Fake Call Overlay -->
 <div class="call-overlay" id="callScreen">
   <div class="call-card">
-    <div class="call-ripple r1"></div>
-    <div class="call-ripple r2"></div>
+
     <div class="call-avatar">👩</div>
     <div class="call-name">MOM</div>
-    <div class="call-subtitle">Incoming Call…</div>
-    <div class="call-number">+91 98765 43210</div>
-    <div class="call-actions">
-      <button class="call-btn decline" onclick="document.getElementById('callScreen').style.display='none'">✕ Decline</button>
-      <button class="call-btn accept" onclick="document.getElementById('callScreen').style.display='none'">✓ Accept</button>
+
+    <div id="callSubtitle" class="call-subtitle">
+      Incoming Call…
     </div>
+
+    <div class="call-actions">
+      <button 
+        class="call-btn decline" 
+        onclick="declineFakeCall()">
+        ✕ Decline
+      </button>
+
+      <button 
+        id="acceptBtn"
+        class="call-btn accept" 
+        onclick="acceptFakeCall()">
+        ✓ Accept
+      </button>
+    </div>
+
   </div>
 </div>
+
+
 
 
 <!-- SOS Countdown Overlay -->
@@ -282,6 +297,12 @@
 <audio id="alarm" preload="auto">
   <source src="alarm.mp3" type="audio/mpeg">
 </audio>
+
+<audio id="ringtone" preload="auto" loop>
+  <source src="ringtone.mp3" type="audio/mpeg">
+</audio>
+
+
 
 
 <script src="data.js"></script>
@@ -320,10 +341,6 @@ window.logAlert = function(msg) {
   log.insertBefore(entry, log.firstChild);
 };
 
-// Override fakeCall to show custom screen
-window.fakeCall = function() {
-  document.getElementById('callScreen').style.display = 'flex';
-};
 
 // Override updateRisk to animate score ring
 const _origUpdateRisk = updateRisk;

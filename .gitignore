@@ -1,5 +1,14 @@
+# Python virtual environment
 venv/
+pytorch-venv/
+.env/
+
+# Python cache
 __pycache__/
 *.pyc
+
+# Mac system files
 .DS_Store
-.env
+
+# Custom folders
+articles/

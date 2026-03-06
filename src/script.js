@@ -358,16 +358,62 @@ function startListening() {
   };
 }
 
+let callActive = false;
+
 function fakeCall() {
   const screen = document.getElementById('callScreen');
   const ringtone = document.getElementById('ringtone');
+  const subtitle = document.getElementById('callSubtitle');
+  const acceptBtn = document.getElementById('acceptBtn');
 
-  if (screen) screen.style.display = 'flex';
+  screen.style.display = 'flex';
+  subtitle.textContent = "Incoming Call…";
+  acceptBtn.textContent = "✓ Accept";
 
-  if (ringtone) {
-    ringtone.currentTime = 0;
-    ringtone.play().catch(err => console.log(err));
-  }
+  ringtone.currentTime = 0;
+  ringtone.play().catch(err => console.log(err));
+
+  callActive = false;
+}
+
+function acceptFakeCall() {
+  const ringtone = document.getElementById('ringtone');
+  const subtitle = document.getElementById('callSubtitle');
+  const acceptBtn = document.getElementById('acceptBtn');
+
+  ringtone.pause();
+  ringtone.currentTime = 0;
+
+  subtitle.textContent = "Call in Progress...";
+  acceptBtn.textContent = "End Call";
+
+  // Change button action
+  acceptBtn.onclick = endFakeCall;
+
+  callActive = true;
+}
+
+function declineFakeCall() {
+  endFakeCall();
+}
+
+function endFakeCall() {
+  const ringtone = document.getElementById('ringtone');
+  const screen = document.getElementById('callScreen');
+  const subtitle = document.getElementById('callSubtitle');
+  const acceptBtn = document.getElementById('acceptBtn');
+
+  ringtone.pause();
+  ringtone.currentTime = 0;
+
+  screen.style.display = 'none';
+  subtitle.textContent = "Incoming Call…";
+  acceptBtn.textContent = "✓ Accept";
+
+  // Restore original action
+  acceptBtn.onclick = acceptFakeCall;
+
+  callActive = false;
 }
 
 
