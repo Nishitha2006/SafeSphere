@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="style.css">
 </head>
 
+
 <body>
 
 <!-- Ambient background -->
@@ -218,7 +219,9 @@
           <span class="qa-icon">📞</span>
           <span class="qa-name">Fake Call</span>
         </button>
-      
+        <button class="qa-btn" onclick="openFeedbackForm()">
+          <span class="qa-icon">🚩</span>
+          <span class="qa-name">Report Issue</span>
         </button>
         <button class="qa-btn" onclick="shareLocation()">
           <span class="qa-icon">📤</span>
@@ -303,13 +306,51 @@
 </audio>
 
 
+<div class="feedback-overlay" id="feedbackOverlay" style="display:none;">
+  <div class="feedback-card">
 
+    <button class="feedback-close-btn" onclick="closeFeedbackForm()">✕</button>
+
+    <div class="feedback-card-header">
+      <span class="feedback-card-title">REPORT SAFETY ISSUE</span>
+      <span class="ai-badge">AI · AGENT</span>
+    </div>
+
+    <textarea id="feedbackText"
+      placeholder="Describe the issue (e.g. streetlight broken, suspicious activity...)">
+    </textarea>
+
+    <div class="feedback-file-section">
+      <span class="feedback-file-label">📎 Provide a picture for proof:</span>
+      <label class="feedback-file-btn" for="feedbackImage">
+        <span>⬆ Choose File</span>
+        <span class="feedback-file-name" id="feedbackFileName">No file chosen</span>
+      </label>
+      <input type="file" id="feedbackImage" accept="image/*" style="display:none;"
+        onchange="document.getElementById('feedbackFileName').textContent = this.files[0]?.name || 'No file chosen'">
+    </div>
+
+    <div class="feedback-card-actions">
+      <button class="action-btn primary feedback-submit-btn" id="submitFeedbackBtn" onclick="submitSafetyFeedback()">
+        <span id="submitBtnContent">⚑ Submit Report</span>
+      </button>
+    </div>
+
+  </div>
+</div>
 
 <script src="data.js"></script>
 <script src="script.js"></script>
 
 <script>
 // Clock
+
+const user = localStorage.getItem("safesphere_user");
+
+if(!user){
+  window.location.href = "login.html";
+}
+
 function updateClock() {
   const now = new Date();
   document.getElementById('navClock').textContent = now.toLocaleTimeString('en-US', {hour12: false});

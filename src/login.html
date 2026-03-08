@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SafeSphere — Setup</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Bebas+Neue&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --red: #ff2828;
+    --red-dim: rgba(255, 40, 40, 0.1);
+    --red-glow: rgba(255, 40, 40, 0.3);
+    --bg: #080a0e;
+    --surface: #0e1117;
+    --surface2: #141820;
+    --surface3: #1c2130;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #e2e4ef;
+    --muted: #5c6480;
+    --green: #34c759;
+    --blue: #0a84ff;
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'Space Grotesk', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* ── Background layers ── */
+  .bg-noise {
+    position: fixed; inset: 0; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; opacity: 0.4;
+  }
+
+  .bg-glow {
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 60% 55% at 15% 85%, rgba(255,30,30,0.07) 0%, transparent 65%),
+      radial-gradient(ellipse 50% 40% at 85% 15%, rgba(10,132,255,0.05) 0%, transparent 55%),
+      radial-gradient(ellipse 70% 60% at 50% 50%, rgba(255,30,30,0.03) 0%, transparent 75%);
+    pointer-events: none;
+  }
+
+  .scan-line {
+    position: fixed; left: 0; right: 0; height: 2px; z-index: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,40,40,0.12), transparent);
+    animation: scanMove 8s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes scanMove { 0% { top: 0; } 100% { top: 100%; } }
+
+  /* ── Grid lines decoration ── */
+  .grid-lines {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 100%);
+  }
+
+  /* ── Main card ── */
+  .setup-wrap {
+    position: relative; z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Brand header above card */
+  .setup-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: fadeUp 0.4s ease 0.05s both;
+  }
+
+  .shield-icon {
+    width: 32px; height: 32px;
+    filter: drop-shadow(0 0 10px rgba(255,40,40,0.55));
+  }
+
+  .brand-text {
+    font-family: var(--font-display);
+    font-size: 32px;
+    letter-spacing: 2px;
+    color: #fff;
+    line-height: 1;
+  }
+  .accent { color: var(--red); }
+
+  .brand-version {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--muted);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+  }
+
+  /* Card */
+  .card {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid rgba(255,40,40,0.2);
+    border-radius: 14px;
+    padding: 32px 28px 28px;
+    width: 380px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow: hidden;
+    box-shadow:
+      0 0 60px rgba(255,30,30,0.07),
+      0 24px 64px rgba(0,0,0,0.7);
+    animation: fadeUp 0.5s ease 0.1s both;
+  }
+
+  /* Top gradient bar */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent 0%, var(--red) 40%, rgba(10,132,255,0.6) 70%, transparent 100%);
+  }
+
+  /* Left corner accent */
+  .card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 36px;
+    background: var(--red);
+    border-radius: 0 0 3px 0;
+    opacity: 0.5;
+  }
+
+  /* Subtle radial glow inside card */
+  .card-glow {
+    position: absolute;
+    top: -40px; left: 50%;
+    transform: translateX(-50%);
+    width: 240px; height: 120px;
+    background: radial-gradient(ellipse, rgba(255,40,40,0.06), transparent 70%);
+    pointer-events: none;
+  }
+
+  .card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-right: 8px;
+  }
+
+  .card-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    letter-spacing: 3px;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .card-subtitle {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  /* Fields */
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    animation: fadeUp 0.45s ease both;
+  }
+  .field:nth-child(1) { animation-delay: 0.15s; }
+  .field:nth-child(2) { animation-delay: 0.22s; }
+
+  .field-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .field-label::before {
+    content: '';
+    display: inline-block;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--red);
+    opacity: 0.7;
+  }
+
+  .field input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 11px 14px;
+    outline: none;
+    transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+    letter-spacing: 0.3px;
+  }
+
+  .field input::placeholder {
+    color: var(--muted);
+    font-style: italic;
+    font-size: 11px;
+  }
+
+  .field input:focus {
+    border-color: rgba(255,40,40,0.45);
+    background: var(--surface3);
+    box-shadow: 0 0 0 3px rgba(255,40,40,0.07);
+  }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 -4px;
+  }
+
+  /* Submit button */
+  .submit-btn {
+    position: relative;
+    width: 100%;
+    padding: 13px 20px;
+    border-radius: 8px;
+    background: var(--red-dim);
+    border: 1px solid rgba(255,40,40,0.3);
+    color: var(--red);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.18s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    overflow: hidden;
+    animation: fadeUp 0.45s ease 0.3s both;
+  }
+
+  .submit-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,40,40,0.08) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.18s;
+  }
+
+  .submit-btn:hover {
+    background: rgba(255,40,40,0.18);
+    box-shadow: 0 4px 20px rgba(255,40,40,0.18), 0 0 0 1px rgba(255,40,40,0.4);
+    transform: translateY(-1px);
+  }
+  .submit-btn:hover::before { opacity: 1; }
+  .submit-btn:active { transform: translateY(0) scale(0.98); }
+
+  /* Error toast */
+  .error-msg {
+    display: none;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--red);
+    background: rgba(255,40,40,0.08);
+    border: 1px solid rgba(255,40,40,0.2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    letter-spacing: 0.5px;
+    animation: fadeUp 0.2s ease;
+  }
+
+  /* Footer note */
+  .setup-footer {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    text-align: center;
+    animation: fadeUp 0.5s ease 0.35s both;
+  }
+
+  .setup-footer span {
+    color: rgba(255,40,40,0.6);
+  }
+</style>
+</head>
+
+<body>
+
+<div class="bg-noise"></div>
+<div class="bg-glow"></div>
+<div class="grid-lines"></div>
+<div class="scan-line"></div>
+
+<div class="setup-wrap">
+
+  <!-- Brand -->
+  <div class="setup-brand">
+    <svg class="shield-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2L3 6V12C3 16.5 7 20.7 12 22C17 20.7 21 16.5 21 12V6L12 2Z" fill="rgba(255,40,40,0.15)" stroke="#ff2828" stroke-width="1.5"/>
+      <path d="M9 12L11 14L15 10" stroke="#ff2828" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <span class="brand-text">Safe<span class="accent">Sphere</span></span>
+    <span class="brand-version">v2.0</span>
+  </div>
+
+  <!-- Card -->
+  <div class="card">
+    <div class="card-glow"></div>
+
+    <div class="card-header">
+      <div class="card-title">INITIAL SETUP</div>
+      <div class="card-subtitle">Configure your safety profile</div>
+    </div>
+
+    <div class="field-group">
+
+      <div class="field">
+        <label class="field-label" for="userName">Your Name</label>
+        <input id="userName" type="text" placeholder="e.g. Aisha Kumar" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="phoneNumber">Emergency Contact Number</label>
+        <input id="phoneNumber" type="tel" placeholder="e.g. +91 98765 43210" autocomplete="off">
+      </div>
+
+    </div>
+
+    <div id="errorMsg" class="error-msg">⚠ Please fill in all fields before continuing.</div>
+
+    <div class="divider"></div>
+
+    <button class="submit-btn" onclick="saveUser()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M12 2L3 6V12C3 16.5 7 20.7 12 22C17 20.7 21 16.5 21 12V6L12 2Z"/>
+        <path d="M9 12L11 14L15 10" stroke-linecap="round"/>
+      </svg>
+      Activate SafeSphere
+    </button>
+  </div>
+
+  <div class="setup-footer">
+    Data stored locally · <span>Never shared</span> · End-to-end private
+  </div>
+
+</div>
+
+<script>
+function saveUser() {
+  const name  = document.getElementById("userName").value.trim();
+  const phone = document.getElementById("phoneNumber").value.trim();
+  const err   = document.getElementById("errorMsg");
+
+  if (!name || !phone) {
+    err.style.display = "block";
+    return;
+  }
+
+  err.style.display = "none";
+
+  localStorage.setItem("safesphere_user", JSON.stringify({ name, phone }));
+  window.location.href = "index.html";
+}
+
+// Hide error on input
+["userName","phoneNumber"].forEach(id => {
+  document.getElementById(id).addEventListener("input", () => {
+    document.getElementById("errorMsg").style.display = "none";
+  });
+});
+
+// Enter key submits
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter") saveUser();
+});
+</script>
+
+</body>
+</html>

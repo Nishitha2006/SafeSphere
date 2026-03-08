@@ -99,7 +99,7 @@ function updateRisk(lat, lon) {
 
   let mode = document.getElementById("modeSelect").value;
   let threshold = mode === "high" ? 40 : mode === "normal" ? 60 : 75;
-
+  console.log("Risk:", risk);
   document.getElementById("score").innerText = Math.max(0, 100 - risk);
 
   if (risk > previousRisk) document.getElementById("trend").innerText = "⬆ Increasing";
@@ -124,7 +124,8 @@ let sosCountdownInterval = null;
 let sosTimeLeft = 5;
 
 function triggerSOS() {
-  // If already counting down, fire immediately
+
+  // If already counting down, trigger immediately
   if (sosCountdownInterval) {
     fireSOS();
     return;
@@ -134,31 +135,44 @@ function triggerSOS() {
   showSOSOverlay();
 
   sosCountdownInterval = setInterval(() => {
-    sosTimeLeft--;
-    const el = document.getElementById("sosCountdownNum");
-    if (el) el.textContent = sosTimeLeft;
 
-    if (sosTimeLeft <= 0) fireSOS();
+    sosTimeLeft--;
+
+    const el = document.getElementById("sosCountdownNum");
+    if (el) el.textContent = Math.max(0, sosTimeLeft);
+
+    if (sosTimeLeft <= 0) {
+      clearInterval(sosCountdownInterval);
+      sosCountdownInterval = null;
+      fireSOS();
+    }
+
   }, 1000);
 }
 
 function fireSOS() {
-  clearInterval(sosCountdownInterval);
-  sosCountdownInterval = null;
-  hideSOSOverlay();
-
+  // 1. Play the alarm audio
   const alarm = document.getElementById("alarm");
+  alarm.play().catch(err => console.log("Audio error:", err));
+  
+  // 2. Show the "Stop Alarm" button and hide the countdown
+  document.getElementById("stopAlarmBtn").style.display = "inline-flex"; 
+  hideSOSOverlay();
+  
+  // 3. Trigger the WhatsApp message
+  sendWhatsAppSOS();
+}
 
-  alarm.loop = true;
-  alarm.currentTime = 0;
+function sendWhatsAppSOS() {
+  const user = JSON.parse(localStorage.getItem("safesphere_user"));
 
-  alarm.play()
-    .then(() => console.log("Alarm playing"))
-    .catch(err => console.error("Audio error:", err));
+  // Fixed the 0{currentLat} typo and used standard maps format
+  const mapsLink = `https://maps.google.com/?q=${currentLat},${currentLon}`;
 
-  logAlert("🚨 SOS Triggered!");
+  const message = `🚨 SOS ALERT!\nI may be in danger.\n\nLocation:\n${mapsLink}`;
+  const url = `https://wa.me/${user.phone}?text=${encodeURIComponent(message)}`;
 
-  document.getElementById("stopAlarmBtn").style.display = "inline-flex";
+  window.open(url, "_blank");
 }
 
 
@@ -349,13 +363,40 @@ function logAlert(msg) {
 }
 
 function startListening() {
-  const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)();
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    alert("Voice recognition not supported in this browser");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+
   recognition.lang = "en-US";
-  recognition.start();
-  recognition.onresult = function(event) {
-    let speech = event.results[0][0].transcript.toLowerCase();
-    if (speech.includes("help") || speech.includes("emergency")) triggerSOS();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onstart = () => {
+    logAlert("🎤 Listening for 'help' or 'emergency'");
   };
+
+  recognition.onresult = function(event) {
+
+    const speech = event.results[0][0].transcript.toLowerCase();
+    console.log("Voice detected:", speech);
+
+    if (speech.includes("help") || speech.includes("emergency")) {
+      logAlert("Voice SOS detected");
+      triggerSOS();
+    }
+  };
+
+  recognition.onerror = (e) => {
+    console.log("Speech error:", e);
+  };
+
+  recognition.start();
 }
 
 let callActive = false;
@@ -459,4 +500,123 @@ function startEvidenceMode() {
       logAlert("Evidence recording started");
       setTimeout(() => { recorder.stop(); logAlert("Evidence secured"); }, 5000);
     });
+}
+
+// ─── USER SAFETY FEEDBACK ─────────────────────────
+
+function updateZoneRisk(lat, lon, newWeight) {
+
+  let nearest = null;
+  let minDist = Infinity;
+
+  riskZones.forEach(zone => {
+
+    const dist = map.distance([lat, lon], [zone.lat, zone.lon]);
+
+    if (dist < minDist) {
+      minDist = dist;
+      nearest = zone;
+    }
+
+  });
+
+  if (nearest && minDist < 300) {
+
+    // update existing zone
+    nearest.weight = newWeight;
+
+    logAlert("AI updated nearby zone weight to " + newWeight);
+
+  } else {
+
+    // determine severity from weight
+    let severity = "low";
+
+    if (newWeight >= 60) severity = "high";
+    else if (newWeight >= 40) severity = "medium";
+
+    // create new dynamic zone
+    const newZone = {
+      lat: lat,
+      lon: lon,
+      weight: newWeight,
+      label: "User Safety Report",
+      severity: severity
+    };
+
+    riskZones.push(newZone);
+
+    drawRiskZones();
+
+    logAlert("New AI risk zone created");
+
+  }
+
+  // force recalculation
+  updateRisk(currentLat, currentLon);
+}
+
+
+function openFeedbackForm() {
+  document.getElementById("feedbackOverlay").style.display = "flex";
+}
+
+function closeFeedbackForm() {
+  document.getElementById("feedbackOverlay").style.display = "none";
+}
+
+
+async function submitSafetyFeedback() {
+
+  if (!currentLat || !currentLon) {
+    logAlert("Start tracking before submitting feedback");
+    return;
+  }
+
+  const text = document.getElementById("feedbackText").value;
+  const imageFile = document.getElementById("feedbackImage").files[0];
+
+  const formData = new FormData();
+  formData.append("description", text);
+  formData.append("lat", currentLat);
+  formData.append("lon", currentLon);
+
+  if (imageFile) formData.append("image", imageFile);
+
+  // Loading state
+  const btn = document.getElementById("submitFeedbackBtn");
+  const btnContent = document.getElementById("submitBtnContent");
+
+  btn.disabled = true;
+  btnContent.innerHTML = '<span class="submit-spinner"></span> Analyzing...';
+
+  logAlert("Submitting report to AI agent...");
+
+  try {
+
+    const res = await fetch("http://127.0.0.1:8000/agent-review", {
+      method: "POST",
+      body: formData
+    });
+
+    const result = await res.json();
+
+    console.log("Agent result:", result);
+
+    updateZoneRisk(currentLat, currentLon, result.updatedWeight);
+
+    logAlert("AI updated risk score");
+
+  } catch (e) {
+
+    console.error(e);
+    logAlert("Error contacting AI agent");
+
+  }
+
+  // Reset button
+  btn.disabled = false;
+  btnContent.innerHTML = '⚑ Submit Report';
+
+  closeFeedbackForm();
 }
