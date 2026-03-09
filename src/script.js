@@ -164,15 +164,43 @@ function fireSOS() {
 }
 
 function sendWhatsAppSOS() {
+  console.log("🚀 sendWhatsAppSOS function triggered!");
+  
   const user = JSON.parse(localStorage.getItem("safesphere_user"));
+  console.log("👤 Loaded user from local storage:", user);
 
-  // Fixed the 0{currentLat} typo and used standard maps format
-  const mapsLink = `https://maps.google.com/?q=${currentLat},${currentLon}`;
-
-  const message = `🚨 SOS ALERT!\nI may be in danger.\n\nLocation:\n${mapsLink}`;
-  const url = `https://wa.me/${user.phone}?text=${encodeURIComponent(message)}`;
-
-  window.open(url, "_blank");
+  console.log("📡 Attempting to send background POST request to Python backend...");
+  
+  // Send a silent background request to the local server
+  fetch("http://127.0.0.1:8000/api/sos", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      latitude: currentLat,
+      longitude: currentLon,
+      phone: user.phone
+    })
+  })
+  .then(response => {
+      console.log("📥 Received response from server:", response);
+      return response.json();
+  })
+  .then(data => {
+     console.log("⚙️ Server data parsed:", data);
+     if(data.success) {
+         console.log("✅ SUCCESS: SOS text sent silently via Twilio.");
+         logAlert("Automated SMS delivered to emergency contact.");
+     } else {
+         console.error("❌ FAILED: Server returned an error:", data.error);
+         logAlert("⚠ Failed to send automated SMS.");
+     }
+  })
+  .catch(error => {
+      console.error("🚨 CRITICAL: Server connection failed entirely:", error);
+      logAlert("⚠ Could not reach SOS server.");
+  });
 }
 
 
