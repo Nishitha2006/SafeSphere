@@ -1,13 +1,48 @@
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from dotenv import load_dotenv
+import os
+from twilio.rest import Client
+
+load_dotenv()
+
+app = FastAPI()
 
 import uuid
 import shutil
 
+
 from agent import graph
 
-app = FastAPI()
+
+
+# Import your routing framework's request handler (e.g., from fastapi import Request)
+
+# Add this route to your existing app
+@app.post("/api/sos") 
+async def send_sos(request: Request):
+    data = await request.json()
+    latitude = data.get("latitude")
+    longitude = data.get("longitude")
+    phone = data.get("phone")
+    if not phone.startswith('+'):
+        phone = '+' + phone
+    # Format the message
+    maps_link = f"https://maps.google.com/?q={latitude},{longitude}"
+    message_body = f"🚨 SOS ALERT!\nI may be in danger.\n\nLocation:\n{maps_link}"
+
+    try:
+        # Execute Twilio API call
+        client = Client(os.environ.get('TWILIO_ACCOUNT_SID'), os.environ.get('TWILIO_AUTH_TOKEN'))
+        message = client.messages.create(
+            body=message_body,
+            from_=os.environ.get('TWILIO_VIRTUAL_NUMBER'),
+            to=phone
+        )
+        return {"success": True, "sid": message.sid}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")

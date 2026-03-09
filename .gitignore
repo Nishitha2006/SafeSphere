@@ -1,7 +1,7 @@
 # Python virtual environment
 venv/
 pytorch-venv/
-.env/
+src/agent/.env
 
 # Python cache
 __pycache__/
